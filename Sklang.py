@@ -1,3 +1,6 @@
+import re
+import sys
+
 # ----------------------------------------------------
 # 1. CORE COMPONENTS: Token and AST Node Structures
 # ----------------------------------------------------
@@ -40,7 +43,6 @@ class IdentifierNode(ASTNode):
 # ----------------------------------------------------
 # 2. LEXER (TOKENIZER)
 # ----------------------------------------------------
-import re
 
 # Define all possible token types and their regular expressions
 TOKEN_SPECIFICATIONS = [
@@ -66,10 +68,11 @@ class Lexer:
     def __init__(self, text):
         self.text = text
         self.position = 0
+        # Compile all regex patterns into one string for efficient matching
         self.token_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKEN_SPECIFICATIONS)
         
     def get_next_token(self):
-        # Stop if we've consumed all text
+        """Returns the next token in the stream, or EOF."""
         if self.position >= len(self.text):
             return Token('EOF')
         
@@ -82,23 +85,19 @@ class Lexer:
             self.position += match.end()
 
             if token_type == 'WHITESPACE':
-                # Skip whitespace and get the next token
                 return self.get_next_token()
             
             if token_type == 'ID':
-                # Check if the ID is actually a Keyword
                 token_type = KEYWORDS.get(token_value, 'ID')
             
             if token_type == 'NUMBER':
-                # Convert number strings to integers
                 token_value = int(token_value)
                 
             if token_type == 'MISMATCH':
-                raise Exception(f"Lexical Error: Invalid character at position {self.position - 1}")
+                raise Exception(f"Lexical Error: Invalid character '{token_value}' at position {self.position - 1}")
 
             return Token(token_type, token_value)
         
-        # Should not be reached if TOKEN_SPECIFICATIONS includes 'MISMATCH'
         raise Exception("Lexical Error: Cannot tokenize remaining input")
 
 # ----------------------------------------------------
@@ -107,12 +106,14 @@ class Lexer:
 class Parser:
     def __init__(self, lexer):
         self.lexer = lexer
-        self.current_token = self.lexer.get_next_token()
         self.tokens = []
-        while self.current_token.type != 'EOF':
-             self.tokens.append(self.current_token)
-             self.current_token = self.lexer.get_next_token()
         self.token_index = 0
+        
+        # Pre-load all tokens from the lexer
+        current_token = self.lexer.get_next_token()
+        while current_token.type != 'EOF':
+             self.tokens.append(current_token)
+             current_token = self.lexer.get_next_token()
 
     def consume(self, expected_type):
         """Advances the token stream and verifies the current token."""
@@ -129,9 +130,8 @@ class Parser:
             return self.tokens[idx]
         return Token('EOF')
 
-    # Basic expression parser for numbers, IDs, and binary operations (+, -)
     def factor(self):
-        """Handles single units: numbers or (expressions)"""
+        """Handles single units: numbers, IDs, or (expressions)"""
         token = self.peek()
         if token.type == 'NUMBER':
             self.consume('NUMBER')
@@ -147,12 +147,9 @@ class Parser:
         else:
             raise Exception(f"Syntax Error: Expected number, ID, or (expression) but got {token.type}")
 
-    def term(self):
-        """Handles Multiplication and Division (not implemented in Lexer yet, so identical to expr for now)"""
-        return self.expr() 
-
     def expr(self):
         """Handles Addition and Subtraction: factor (+|-) factor ..."""
+        # Note: This simple grammar treats all terms as factors for now (no operator precedence yet)
         node = self.factor()
         
         while self.peek().type in ('PLUS', 'MINUS'):
@@ -188,7 +185,6 @@ class Parser:
             elif self.peek().type == 'ECHO':
                  statements.append(self.echo_statement())
             else:
-                 # Minimal implementation: just skip unexpected tokens or handle other types here
                  raise Exception(f"Syntax Error: Unexpected statement start with {self.peek().type}")
 
         return statements
@@ -227,7 +223,7 @@ class Interpreter:
             return left_val + right_val
         elif node.op == 'MINUS':
             return left_val - right_val
-        # Add logic for *, /, etc. here
+        # Add logic for multiplication, division, etc. here
         
         raise Exception(f"Runtime Error: Unknown operator {node.op}")
 
@@ -252,37 +248,62 @@ class Interpreter:
                 self.visit_Echo(statement)
             elif isinstance(statement, ASTNode):
                 self.visit(statement)
-            else:
-                raise Exception(f"Unknown statement type: {statement}")
+            # Future expansion for other statement types (IF, WHILE, etc.)
 
 # ----------------------------------------------------
-# 5. EXECUTION EXAMPLE
+# 5. EXECUTION LOGIC (COMMAND-LINE)
 # ----------------------------------------------------
 
-# Sklang Code to interpret (Main Feature: Variables and Expressions)
-sklang_code = """
-SKIBIDI a = 10;
-SKIBIDI b = 5 + 3;
-SKIBIDI c = a - 2;
-ECHO b + c;
-"""
+def run_sklang_file(filepath):
+    """Reads the Sklang code from a file and runs the interpreter pipeline."""
+    # Check for the correct file extension
+    if not filepath.lower().endswith(('.skb', '.skl')):
+        print(f"Warning: File extension is not .skb or .skl. Proceeding anyway...")
 
-try:
-    # 1. Lexing
-    lexer = Lexer(sklang_code)
-    # The Lexer runs during Parser initialization
+    try:
+        # Read the content of the file
+        with open(filepath, 'r') as f:
+            sklang_code = f.read()
+            
+        print(f"--- Running Sklang File: {filepath} ---")
 
-    # 2. Parsing
-    parser = Parser(lexer)
-    program_ast = parser.parse_program()
-    print("--- AST Successfully Generated ---")
-    # print(program_ast) # Uncomment to see the raw AST nodes
+        # 1. Lexing & Parsing
+        lexer = Lexer(sklang_code)
+        parser = Parser(lexer)
+        program_ast = parser.parse_program()
+        print("--- AST Successfully Generated ---")
 
-    # 3. Interpretation (Execution)
-    interpreter = Interpreter(program_ast)
-    print("\n--- Sklang Execution Start ---")
-    interpreter.run()
-    print("--- Sklang Execution End ---")
+        # 2. Interpretation (Execution)
+        interpreter = Interpreter(program_ast)
+        print("\n--- Sklang Execution Start ---")
+        interpreter.run()
+        print("--- Sklang Execution End ---")
 
-except Exception as e:
-    print(f"\n--- Sklang ERROR --- \n{e}")
+    except FileNotFoundError:
+        print(f"Error: The file '{filepath}' was not found.")
+    except Exception as e:
+        print(f"\n--- Sklang ERROR --- \n{e}")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python sklang_interpreter.py <filepath.skb>")
+        # Run a self-test example if no file is provided
+        print("\n--- Running Self-Test Example ---")
+        test_code = """
+        SKIBIDI a = 10;
+        SKIBIDI b = 5 + 3;
+        SKIBIDI c = a - 2;
+        ECHO b + c;
+        """
+        try:
+            lexer = Lexer(test_code)
+            parser = Parser(lexer)
+            program_ast = parser.parse_program()
+            interpreter = Interpreter(program_ast)
+            interpreter.run()
+        except Exception as e:
+            print(f"Self-Test Failed: {e}")
+            
+    else:
+        file_path = sys.argv[1]
+        run_sklang_file(file_path)
