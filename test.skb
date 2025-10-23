@@ -1,0 +1,37 @@
+// Sklang Test Code - FLOATING POINT VERSION
+
+// 1. Variable Declaration and Floating Point Arithmetic
+SKIBIDI price = 10.99;
+SKIBIDI quantity = 5;
+SKIBIDI tax_rate = 0.05;
+
+// Calculate subtotal
+SKIBIDI subtotal = price * quantity; // subtotal = 54.95
+
+// Calculate final total (with tax)
+SKIBIDI total = subtotal + (subtotal * tax_rate); 
+ECHO total; // Expected Output: 57.6975 -> (54.95 * 1.05) rounded to 57.7
+
+// 2. Reassignment and Float-Based Logic
+SKIBIDI threshold = 50.0; 
+
+IF (total GT threshold) THEN
+    SKIBIDI status = "Over Budget";
+    ECHO status;
+ENDIF;
+
+// 3. Final calculation using Division
+SKIBIDI split = total / 2.0; 
+ECHO split; // Expected Output: 28.85 (approx)
+
+// --- Expected Runtime Error Test ---
+SKIBIDI Y = 10;
+SKIBIDI Z = 5;
+
+IF (Y GT Z) THEN
+    SKIBIDI Zero = Z - 5;       
+    SKIBIDI CrashTest = Y / Zero; // Triggers: Runtime Error: Division by zero
+    ECHO CrashTest;             
+ENDIF;
+
+ECHO "End of test.";
