@@ -1,0 +1,10 @@
+SPAWN factorial(n) FR
+    SUS n EQEQ 0 FR
+        YEET 1;
+    NAH;
+    YEET n * factorial(n-1);
+DESPAWN;
+
+SKIBIDI result = factorial(5);
+YAP "Sum is:";
+YAP result;

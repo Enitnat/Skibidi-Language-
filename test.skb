@@ -1,53 +1,16 @@
-// Sklang Benchmark Test - Comprehensive Feature Stress Test
+SKIBIDI x = 10;
+SKIBIDI y = 20;
 
-// --- 1. Variable Initialization ---
-SKIBIDI X = 100;
-SKIBIDI Y = 10.0; // Float
-SKIBIDI Z = 5;
-SKIBIDI Status = "PENDING";
+YAP "Sum is:";
+YAP x + y;
 
-// --- 2. Arithmetic Precedence and Float Behavior ---
-// Expected: (100 / 10.0) * 3 - 5 + 1.5
-// (10.0) * 3 - 5 + 1.5 = 30.0 - 5 + 1.5 = 26.5
-SKIBIDI Result_A = X / Y * 3 - Z + 1.5;
-ECHO Result_A; // Output: 26.5
+SPAWN add(a, b) FR
+    YEET a + b;
+DESPAWN;
 
-// --- 3. Complex Comparison Operators ---
-SKIBIDI check_gt = Y GT Z; // 10.0 > 5 -> TRUE
-SKIBIDI check_lte = (Z * 2) LTE Y; // 10 <= 10.0 -> TRUE
-SKIBIDI check_neq = X NEQ 99.9; // 100 != 99.9 -> TRUE
+YAP add(5, 7);
 
-ECHO check_gt;
-ECHO check_lte;
-ECHO check_neq;
-
-// --- 4. Boolean Logic (AND/OR) ---
-// Test 1: (FALSE) AND (TRUE) -> FALSE
-IF (Z > X) AND (Y == 10) THEN
-    Status = "FAILED: AND SHORT-CIRCUIT";
-ENDIF;
-
-// Test 2: (TRUE) OR (FALSE) -> TRUE
-IF (Y GTE 10.0) OR (Z == 0) THEN
-    Status = "PASSED: LOGIC OK";
-ENDIF;
-
-ECHO Status;
-
-// --- 5. Reassignment and Type Coercion ---
-SKIBIDI Label = "Value is: ";
-// Expected Output: Value is: 37
-Label = Label + (Result_A + 10.5) + (Z * 1);
-ECHO Label; 
-
-// --- 6. Division by Zero Test (Expected Runtime Failure) ---
-SKIBIDI Denom = X - X; // Denom = 0
-SKIBIDI Numer = 50;
-
-IF (Numer GT Z) THEN
-    // This line should raise a Runtime Error
-    SKIBIDI FinalCrash = Numer / Denom;
-    ECHO FinalCrash; 
-ENDIF;
-
-ECHO "END OF BENCHMARK."; // Should NOT be reached
+COOK (x < 15) GYATT
+    YAP x;
+    x = x + 1;
+STOPCOOKIN;

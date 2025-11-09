@@ -1,0 +1,11 @@
+SKIBIDI i = 1;
+SKIBIDI j = 1;
+
+COOK (i <= 3) GYATT
+    j = 1;
+    COOK (j <= 2) GYATT
+        YAP "i=" + i + ", j=" + j;
+        j = j + 1;
+    STOPCOOKIN;
+    i = i + 1;
+STOPCOOKIN;

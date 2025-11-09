@@ -1,0 +1,13 @@
+SKIBIDI a = 10;
+SKIBIDI b = 20;
+SKIBIDI result = "None";
+
+SUS (a < b) AND (b > 15) FR
+    result = "Condition True";
+NAH;
+YAP result;
+
+SUS (a > b) OR (b == 20) FR
+    result = "Second Condition True";
+NAH;
+YAP result;
